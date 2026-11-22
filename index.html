@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng Dụng Lịch Cá Nhân - Calendar App</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar: Tổng quan, Đồng hồ & Danh sách sự kiện ngày chọn -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-calendar-star"></i>
+                    <span>MyCalendar</span>
+                </div>
+                <button id="themeToggleBtn" class="icon-btn" title="Chuyển chế độ Sáng / Tối">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+
+            <!-- Đồng hồ thời gian thực -->
+            <div class="live-clock-card">
+                <div class="clock-time" id="clockTime">00:00:00</div>
+                <div class="clock-date" id="clockDate">Thứ Hai, ngày 01 tháng 01</div>
+            </div>
+
+            <!-- Ngày đang được chọn -->
+            <div class="selected-day-banner">
+                <div class="banner-title">LỊCH TRÌNH NGÀY</div>
+                <div class="banner-date" id="bannerSelectedDate">Hôm nay</div>
+                <div class="banner-badge" id="eventCountBadge">0 sự kiện</div>
+            </div>
+
+            <!-- Danh sách sự kiện trong ngày -->
+            <div class="events-section">
+                <div class="events-header">
+                    <h3>Sự kiện trong ngày</h3>
+                    <button id="quickAddBtn" class="btn-sm btn-primary">
+                        <i class="fa-solid fa-plus"></i> Thêm
+                    </button>
+                </div>
+                <div class="events-list" id="eventsList">
+                    <!-- JavaScript sẽ tự render danh sách sự kiện ở đây -->
+                </div>
+            </div>
+
+            <!-- Thống kê nhanh tháng này -->
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span class="stat-num" id="monthTotalEvents">0</span>
+                    <span class="stat-label">Sự kiện tháng này</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" id="completedEventsCount">0</span>
+                    <span class="stat-label">Đã hoàn thành</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content: Lịch chính -->
+        <main class="main-calendar">
+            <!-- Calendar Navigation Header -->
+            <div class="calendar-top-bar">
+                <div class="nav-controls">
+                    <h2 class="month-year-display" id="monthYearDisplay">Tháng 1, 2026</h2>
+                    <div class="btn-group">
+                        <button id="prevMonthBtn" class="icon-btn" title="Tháng trước">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button id="todayBtn" class="btn-outline">Hôm nay</button>
+                        <button id="nextMonthBtn" class="icon-btn" title="Tháng sau">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="calendar-actions">
+                    <!-- Bộ lọc loại sự kiện -->
+                    <div class="filter-wrapper">
+                        <i class="fa-solid fa-filter"></i>
+                        <select id="categoryFilter">
+                            <option value="all">Tất cả danh mục</option>
+                            <option value="work">Công việc</option>
+                            <option value="study">Học tập</option>
+                            <option value="personal">Cá nhân</option>
+                            <option value="important">Quan trọng</option>
+                        </select>
+                    </div>
+
+                    <!-- Nút mở modal thêm sự kiện -->
+                    <button id="openAddModalBtn" class="btn-primary">
+                        <i class="fa-solid fa-plus"></i> Tạo sự kiện mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hàng tiêu đề thứ trong tuần -->
+            <div class="weekdays-grid">
+                <div>T2 <span>Hai</span></div>
+                <div>T3 <span>Ba</span></div>
+                <div>T4 <span>Tư</span></div>
+                <div>T5 <span>Năm</span></div>
+                <div>T6 <span>Sáu</span></div>
+                <div class="weekend">T7 <span>Bảy</span></div>
+                <div class="weekend">CN <span>Nhật</span></div>
+            </div>
+
+            <!-- Lưới các ô ngày trong tháng -->
+            <div class="days-grid" id="daysGrid">
+                <!-- JavaScript sẽ render các ngày động tại đây -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Thêm / Chỉnh sửa sự kiện -->
+    <div class="modal-overlay" id="eventModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fa-regular fa-calendar-plus"></i> Thêm sự kiện mới</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="eventForm">
+                <input type="hidden" id="eventId">
+
+                <div class="form-group">
+                    <label for="eventTitle">Tiêu đề sự kiện <span class="required">*</span></label>
+                    <input type="text" id="eventTitle" placeholder="Ví dụ: Thi LTHĐT, Họp nhóm, Sinh nhật..." required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventDate">Ngày diễn ra <span class="required">*</span></label>
+                        <input type="date" id="eventDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventCategory">Danh mục</label>
+                        <select id="eventCategory">
+                            <option value="work">💼 Công việc</option>
+                            <option value="study">📚 Học tập</option>
+                            <option value="personal">☕ Cá nhân</option>
+                            <option value="important">⭐ Quan trọng</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventStartTime">Giờ bắt đầu</label>
+                        <input type="time" id="eventStartTime" value="09:00">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventEndTime">Giờ kết thúc</label>
+                        <input type="time" id="eventEndTime" value="10:30">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDescription">Ghi chú chi tiết</label>
+                    <textarea id="eventDescription" rows="3" placeholder="Nhập ghi chú thêm cho sự kiện này..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelModalBtn">Hủy</button>
+                    <button type="submit" class="btn-primary" id="saveEventBtn">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu sự kiện
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

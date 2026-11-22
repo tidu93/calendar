@@ -1,0 +1,15 @@
+# C++ Executables & Temporary Files
+*.exe
+*.o
+*.obj
+*.out
+
+# VS Code settings
+.vscode/
+
+# Legacy practice files
+bai.cpp
+dung.cpp
+2.cpp
+Untitled*
+
